@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dyno_scaler (0.0.1)
+    dyno_scaler (0.1.0)
       activesupport
       heroku-api
 

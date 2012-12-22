@@ -18,7 +18,59 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Just include this module in your Resque job and you're good to go:
+
+    class MyJob
+      include DynoScaler::Workers::Resque
+      
+      ...
+    end
+
+You can access the configuration with (for example):
+
+    DynoScaler.configuration.max_workers = 3
+
+In Rails, you can access it easily in your application.rb:
+
+    config.dyno_scaler.max_workers = 3
+
+If you want to scale up or down your workers manually, you can use the manager
+directly:
+
+    DynoScaler.manager.scale_up(options)
+    DynoScaler.manager.scale_down(options)
+
+You must pass an options hash with the number of workers, the number of pending
+jobs, and the number of running jobs, like so:
+
+    {
+      workers: 10,
+      working: 3,
+      pending: 5
+    }
+
+This hash is exactly what `Resque.info` returns, so you may just pass it instead:
+
+    DynoScaler.manager.scale_up(Resque.info)
+
+## Async
+
+Whenever DynoScaler needs to scale workers up it will perform a request to the
+Heroku API. This request may sometimes take longer to return than one would want.
+Because of this we have a async option that uses
+[GirlFriday](https://github.com/mperham/girl_friday) to handle this call
+asynchronously. To enable it, just set it to `true`:
+
+    config.async = true
+    
+You can also give it a block to better customize it. It will receive an options
+hash that can be passed to the `DynoScaler::Manager#scale_with` method, like so:
+
+    MY_QUEUE = GirlFriday::WorkQueue.new(:my_queue, size: 5) do |options|
+      DynoScaler.manager.scale_with(options)
+    end
+
+    config.async { MY_QUEUE << options }
 
 ## Contributing
 
