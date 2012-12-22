@@ -5,4 +5,5 @@ gemspec
 
 group(:test) do
   gem 'simplecov', require: false
+  gem 'rails'
 end

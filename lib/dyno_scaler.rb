@@ -2,6 +2,7 @@
 
 require "dyno_scaler/version"
 require "active_support/core_ext/class/attribute"
+require "heroku-api"
 
 module DynoScaler
   autoload :Configuration, 'dyno_scaler/configuration'
@@ -18,4 +19,4 @@ module DynoScaler
   end
 end
 
-require "heroku-api"
+require "dyno_scaler/engine" if defined?(Rails)
