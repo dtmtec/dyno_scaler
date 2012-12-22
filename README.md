@@ -1,5 +1,10 @@
 # DynoScaler
 
+[![alt build status][1]][2]
+
+[1]: https://secure.travis-ci.org/dtmconsultoria/dyno_scaler.png
+[2]: http://travis-ci.org/#!/dtmconsultoria/dyno_scaler
+
 Scale your dyno workers on Heroku as needed.
 
 ## Installation
