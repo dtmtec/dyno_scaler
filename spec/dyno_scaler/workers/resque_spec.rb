@@ -73,6 +73,29 @@ describe DynoScaler::Workers::Resque do
       end
     end
 
+    context "when an error occurs while scaling up" do
+      before do
+        manager.stub!(:scale_up).and_raise("error")
+      end
+
+      it "does not raises it" do
+        capture(:stderr) do
+          expect { Resque.enqueue(SampleJob) }.to_not raise_error
+        end
+      end
+
+      it "enqueues the job" do
+        capture(:stderr) do
+          Resque.enqueue(SampleJob)
+          work_off(:sample)
+        end
+      end
+
+      it "prints a message in $stderr" do
+        capture(:stderr) { Resque.enqueue(SampleJob) }.should eq("Could not scale up workers: error\n")
+      end
+    end
+
     context "and async is configured" do
       let(:config) { DynoScaler.configuration }
 
@@ -156,6 +179,22 @@ describe DynoScaler::Workers::Resque do
       it "does not scale down" do
         manager.should_not_receive(:scale_down)
         work_off(:sample)
+      end
+    end
+
+    context "when an error occurs while scaling down" do
+      before do
+        manager.stub!(:scale_down).and_raise("error")
+      end
+
+      it "does not raises it" do
+        capture(:stderr) do
+          expect { work_off(:sample) }.to_not raise_error
+        end
+      end
+
+      it "prints a message in $stderr" do
+        capture(:stderr) { work_off(:sample) }.should eq("Could not scale down workers: error\n")
       end
     end
   end

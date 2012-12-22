@@ -22,6 +22,8 @@ module DynoScaler
           info.merge!(working: working) # we are not working anymore
 
           dyno_scaler_manager.scale_down(info) if scale_down_enabled?
+        rescue StandardError => e
+          $stderr.puts "Could not scale down workers: #{e}"
         end
 
         def after_enqueue_scale_up(*args)
@@ -32,6 +34,8 @@ module DynoScaler
               dyno_scaler_manager.scale_up(::Resque.info)
             end
           end
+        rescue StandardError => e
+          $stderr.puts "Could not scale up workers: #{e}"
         end
 
         def enable_scaling_up
