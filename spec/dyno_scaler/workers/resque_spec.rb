@@ -112,7 +112,7 @@ describe DynoScaler::Workers::Resque do
 
           after do
             GirlFriday::Queue.queue!
-            DynoScaler.instance_variable_set("@manager", nil)
+            DynoScaler.reset!
           end
 
           it "runs the scale up with the Resque info and the scale up action" do

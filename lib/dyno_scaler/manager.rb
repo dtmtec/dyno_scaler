@@ -13,7 +13,9 @@ module DynoScaler
     end
 
     def scale_up?
-      options[:pending] > 0 && number_of_workers_needed > options[:workers]
+      workers_needed = number_of_workers_needed
+
+      options[:pending] > 0 && workers_needed > options[:workers] && workers_needed <= config.max_workers
     end
 
     def scale_down(options)
@@ -21,11 +23,11 @@ module DynoScaler
 
       self.options = options
 
-      heroku.scale_workers(0) if scale_down?
+      heroku.scale_workers(config.min_workers) if scale_down?
     end
 
     def scale_down?
-      options[:workers] > 0 && options[:pending] == 0 && options[:working] == 0
+      options[:workers] > config.min_workers && options[:pending] == 0 && options[:working] == 0
     end
 
     def scale_with(options)

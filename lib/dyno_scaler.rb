@@ -17,6 +17,11 @@ module DynoScaler
   def self.manager
     @manager ||= Manager.new
   end
+
+  def self.reset!
+    @configuration = nil
+    @manager = nil
+  end
 end
 
 require "dyno_scaler/engine" if defined?(Rails)

@@ -20,6 +20,7 @@ describe DynoScaler::Manager do
   end
 
   before do
+    DynoScaler.reset!
     config.max_workers = 5
     config.application = 'my-app'
     config.enabled = true
@@ -119,6 +120,19 @@ describe DynoScaler::Manager do
           perform_action
         end
       end
+
+      context "and it is the maximum number of workers running" do
+        before { config.max_workers = workers }
+
+        context "and there is enough pending jobs as to scale another worker" do
+          let(:pending_jobs) { config.job_worker_ratio[5] }
+
+          it "does nothing" do
+            heroku.should_not_receive(:scale_workers)
+            perform_action
+          end
+        end
+      end
     end
   end
 
@@ -140,8 +154,17 @@ describe DynoScaler::Manager do
       context "and there are no pending jobs" do
         context "and no running jobs" do
           it "scales down" do
-            heroku.should_receive(:scale_workers).with(0)
+            heroku.should_receive(:scale_workers).with(config.min_workers)
             perform_action
+          end
+
+          context "when min_workers is configured with a different value" do
+            before { config.min_workers = 1 }
+
+            it "does nothing" do
+              heroku.should_not_receive(:scale_workers)
+              perform_action
+            end
           end
         end
 
@@ -182,8 +205,17 @@ describe DynoScaler::Manager do
       context "and there are no pending jobs" do
         context "and no running jobs" do
           it "scales down" do
-            heroku.should_receive(:scale_workers).with(0)
+            heroku.should_receive(:scale_workers).with(config.min_workers)
             perform_action
+          end
+
+          context "when min_workers is configured with a different value" do
+            before { config.min_workers = 2 }
+
+            it "scales down to the min workers value" do
+              heroku.should_receive(:scale_workers).with(config.min_workers)
+              perform_action
+            end
           end
         end
 
