@@ -19,14 +19,19 @@ module DynoScaler
         def after_perform_scale_down(*args)
           info = ::Resque.info
           working = info[:working] > 0 ? info[:working] - 1 : 0
+          info.merge!(working: working) # we are not working anymore
 
-          manager.scale_down(info[:workers], info[:pending], working) if scale_down_enabled?
+          dyno_scaler_manager.scale_down(info) if scale_down_enabled?
         end
 
         def after_enqueue_scale_up(*args)
-          info = ::Resque.info
-
-          manager.scale_up(info[:workers], info[:pending]) if scale_up_enabled?
+          if scale_up_enabled?
+            if DynoScaler.configuration.async?
+              DynoScaler.configuration.async.call(::Resque.info.merge(action: :scale_up))
+            else
+              dyno_scaler_manager.scale_up(::Resque.info)
+            end
+          end
         end
 
         def enable_scaling_up
@@ -45,9 +50,10 @@ module DynoScaler
           self.scale_down_enabled = false
         end
 
-        def manager
-          @manager ||= DynoScaler::Manager.new
-        end
+        private
+          def dyno_scaler_manager
+            @manager ||= DynoScaler::Manager.new
+          end
       end
     end
   end

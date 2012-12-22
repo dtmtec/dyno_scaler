@@ -46,4 +46,28 @@ describe DynoScaler::Configuration do
       config.application.should eq(ENV['HEROKU_APP'])
     end
   end
+
+  describe "async" do
+    it "defaults to false" do
+      config.async.should be_false
+    end
+
+    context "when set to true" do
+      before { config.async = true }
+
+      it "configures a GirlFriday-callable" do
+        config.async.should respond_to(:call)
+      end
+    end
+
+    context "when configured with a block" do
+      before do
+        config.async { :ok }
+      end
+
+      it "configures the callable" do
+        config.async.call.should eq(:ok)
+      end
+    end
+  end
 end

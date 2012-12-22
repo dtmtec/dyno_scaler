@@ -7,9 +7,17 @@ describe DynoScaler::Manager do
 
   let(:heroku) { mock(DynoScaler::Heroku, scale_workers: false) }
 
-  let(:workers) { 0 }
+  let(:workers)      { 0 }
   let(:pending_jobs) { 0 }
   let(:running_jobs) { 0 }
+
+  let(:options) do
+    {
+      workers: workers,
+      pending: pending_jobs,
+      working: running_jobs
+    }
+  end
 
   before do
     config.max_workers = 5
@@ -30,7 +38,7 @@ describe DynoScaler::Manager do
 
   describe "scale up" do
     def perform_action
-      manager.scale_up(workers, pending_jobs)
+      manager.scale_up(options)
     end
 
     context "when there are no workers running" do
@@ -116,7 +124,7 @@ describe DynoScaler::Manager do
 
   describe "scale down" do
     def perform_action
-      manager.scale_down(workers, pending_jobs, running_jobs)
+      manager.scale_down(options)
     end
 
     context "when there are no workers running" do
@@ -207,6 +215,38 @@ describe DynoScaler::Manager do
             perform_action
           end
         end
+      end
+    end
+  end
+
+  describe "scale with options" do
+    let(:action) { :scale_up }
+    let(:options) do
+      {
+        action: action,
+        workers: workers,
+        pending_jobs: pending_jobs,
+        running_jobs: running_jobs
+      }
+    end
+
+    def perform_action
+      manager.scale_with(options)
+    end
+
+    context "when action is scale up" do
+      it "scales up passing options" do
+        manager.should_receive(:scale_up).with(options)
+        perform_action
+      end
+    end
+
+    context "when action is scale down" do
+      let(:action) { :scale_down }
+
+      it "scales down passing options" do
+        manager.should_receive(:scale_down).with(options)
+        perform_action
       end
     end
   end

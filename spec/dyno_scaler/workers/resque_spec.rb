@@ -41,7 +41,7 @@ describe DynoScaler::Workers::Resque do
 
   describe "when enqueued" do
     it "scales up" do
-      manager.should_receive(:scale_up).with(workers, pending)
+      manager.should_receive(:scale_up).with(Resque.info)
       Resque.enqueue(SampleJob)
     end
 
@@ -49,7 +49,7 @@ describe DynoScaler::Workers::Resque do
       let(:workers) { 2 }
 
       it "passes the number of current workers to the manager" do
-        manager.should_receive(:scale_up).with(workers, pending)
+        manager.should_receive(:scale_up).with(Resque.info)
         Resque.enqueue(SampleJob)
       end
     end
@@ -58,7 +58,7 @@ describe DynoScaler::Workers::Resque do
       let(:pending) { 5 }
 
       it "passes the number of pending jobs" do
-        manager.should_receive(:scale_up).with(workers, pending)
+        manager.should_receive(:scale_up).with(Resque.info)
         Resque.enqueue(SampleJob)
       end
     end
@@ -72,6 +72,44 @@ describe DynoScaler::Workers::Resque do
         Resque.enqueue(SampleJob)
       end
     end
+
+    context "and async is configured" do
+      let(:config) { DynoScaler.configuration }
+
+      context "with default processor" do
+        before { config.async = true }
+
+        it "calls the given async processor passing the current Resque info and the scale up action" do
+          config.async.should_receive(:call).with(Resque.info.merge(action: :scale_up))
+          Resque.enqueue(SampleJob)
+        end
+
+        context "and the Girl-Friday job is run" do
+          before { GirlFriday::Queue.immediate! }
+
+          after do
+            GirlFriday::Queue.queue!
+            DynoScaler.instance_variable_set("@manager", nil)
+          end
+
+          it "runs the scale up with the Resque info and the scale up action" do
+            DynoScaler.manager.should_receive(:scale_with).with(Resque.info.merge(action: :scale_up))
+            Resque.enqueue(SampleJob)
+          end
+        end
+      end
+
+      context "with a block" do
+        before do
+          config.async { |options| :ok }
+        end
+
+        it "calls the given async processor passing the current Resque info and the scale up action" do
+          config.async.should_receive(:call).with(Resque.info.merge(action: :scale_up))
+          Resque.enqueue(SampleJob)
+        end
+      end
+    end
   end
 
   describe "after performing" do
@@ -80,7 +118,7 @@ describe DynoScaler::Workers::Resque do
     end
 
     it "scales down" do
-      manager.should_receive(:scale_down).with(workers, pending, working)
+      manager.should_receive(:scale_down).with(Resque.info)
       work_off(:sample)
     end
 
@@ -88,7 +126,7 @@ describe DynoScaler::Workers::Resque do
       let(:workers) { 2 }
 
       it "passes the number of current workers to the manager" do
-        manager.should_receive(:scale_down).with(workers, pending, working)
+        manager.should_receive(:scale_down).with(Resque.info)
         work_off(:sample)
       end
     end
@@ -97,7 +135,7 @@ describe DynoScaler::Workers::Resque do
       let(:pending) { 5 }
 
       it "passes the number of pending jobs" do
-        manager.should_receive(:scale_down).with(workers, pending, working)
+        manager.should_receive(:scale_down).with(Resque.info)
         work_off(:sample)
       end
     end
@@ -106,7 +144,7 @@ describe DynoScaler::Workers::Resque do
       let(:working) { 5 }
 
       it "passes the number of running jobs minus 1, since we do not count ourselves" do
-        manager.should_receive(:scale_down).with(workers, pending, working - 1)
+        manager.should_receive(:scale_down).with(Resque.info.merge(working: Resque.info[:working] - 1))
         work_off(:sample)
       end
     end

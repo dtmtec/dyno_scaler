@@ -66,5 +66,32 @@ module DynoScaler
         5 => 100
       }
     end
+
+    # Returns the current configured async Proc or configures one.
+    def async(&block)
+      @async = block if block_given?
+      @async
+    end
+    alias_method :async?, :async
+
+    ##
+    # When set to true it will use GirlFriday to asynchronous process the scaling,
+    # otherwise you may pass a Proc that will be called whenever scaling is needed.
+    #
+    # Defaults to false, meaning that scaling is processed synchronously.
+    def async=(value)
+      @async = value == true ? default_async_processor : value
+    end
+
+    private
+      def default_async_processor
+        require 'girl_friday'
+
+        queue = GirlFriday::WorkQueue.new(nil, :size => 1) do |options|
+          DynoScaler.manager.scale_with(options)
+        end
+
+        Proc.new { |options| queue << options }
+      end
   end
 end

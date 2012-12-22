@@ -12,6 +12,10 @@ module DynoScaler
   def self.configuration
     @configuration ||= Configuration.new
   end
+
+  def self.manager
+    @manager ||= Manager.new
+  end
 end
 
 require "heroku-api"
