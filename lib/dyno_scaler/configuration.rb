@@ -83,6 +83,19 @@ module DynoScaler
       @async = value == true ? default_async_processor : value
     end
 
+    ##
+    # The logger to be used to log message
+    #
+    # When using Rails it will default to Rails.logger, otherwise it will be
+    # set a `Logger.new(STDERR)`.
+    #
+    # @param [Logger] the logger to be used
+    # @return [Logger] default: nil
+    def logger
+      @logger ||= defined?(Rails) ? Rails.logger || Logger.new(STDERR) : Logger.new(STDERR)
+    end
+    attr_writer :logger
+
     private
       def default_async_processor
         require 'girl_friday'

@@ -21,6 +21,8 @@ describe DynoScaler::Manager do
 
   before do
     DynoScaler.reset!
+    DynoScaler.configuration.logger = Logger.new(StringIO.new)
+
     config.max_workers = 5
     config.application = 'my-app'
     config.enabled = true

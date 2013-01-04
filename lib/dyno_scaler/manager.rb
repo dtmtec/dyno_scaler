@@ -9,7 +9,7 @@ module DynoScaler
 
       self.options = options
 
-      heroku.scale_workers(number_of_workers_needed) if scale_up?
+      scale_to(number_of_workers_needed) if scale_up?
     end
 
     def scale_up?
@@ -23,7 +23,7 @@ module DynoScaler
 
       self.options = options
 
-      heroku.scale_workers(config.min_workers) if scale_down?
+      scale_to(config.min_workers) if scale_down?
     end
 
     def scale_down?
@@ -40,6 +40,11 @@ module DynoScaler
     protected
       def config
         DynoScaler.configuration
+      end
+
+      def scale_to(number_of_workers)
+        config.logger.info "Scaling workers to #{number_of_workers}"
+        heroku.scale_workers(number_of_workers)
       end
 
       def pending_jobs?

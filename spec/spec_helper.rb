@@ -21,6 +21,10 @@ RSpec.configure do |config|
   #     --seed 1234
   # config.order = 'random'
 
+  config.before do
+    DynoScaler.configuration.logger = Logger.new(StringIO.new)
+  end
+
   def capture(stream)
     begin
       stream = stream.to_s
