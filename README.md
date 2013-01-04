@@ -58,6 +58,14 @@ jobs, and the number of running jobs, like so:
 
     DynoScaler.manager.scale_up(Resque.info)
 
+When deploying to heroku you'll want to add these two configuration keys:
+
+    HEROKU_API_KEY=<YOUR-API-KEY-HERE>
+    HEROKU_APPLICATION=<THE-NAME-OF-YOUR-APP-ON-HEROKU-HERE>
+
+They are used by the [heroku-api](https://github.com/heroku/heroku.rb) gem to
+scale dynos of your application.
+
 ## Async
 
 Whenever DynoScaler needs to scale workers up it will perform a request to the
