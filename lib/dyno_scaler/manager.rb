@@ -31,7 +31,10 @@ module DynoScaler
     end
 
     def scale_with(options)
-      send(options[:action], options)
+      return unless config.enabled?
+
+      action = options[:action] || action_for(options)
+      send(action, options) if action
     end
 
     protected
@@ -45,6 +48,13 @@ module DynoScaler
         end
 
         value ? value.first : 0
+      end
+
+      def action_for(options)
+        self.options = options
+
+        return :scale_down if scale_down?
+        return :scale_up if scale_up?
       end
 
       def heroku

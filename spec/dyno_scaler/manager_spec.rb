@@ -257,8 +257,8 @@ describe DynoScaler::Manager do
       {
         action: action,
         workers: workers,
-        pending_jobs: pending_jobs,
-        running_jobs: running_jobs
+        pending: pending_jobs,
+        working: running_jobs
       }
     end
 
@@ -279,6 +279,68 @@ describe DynoScaler::Manager do
       it "scales down passing options" do
         manager.should_receive(:scale_down).with(options)
         perform_action
+      end
+    end
+
+    context "when no action is provided" do
+      let(:options) do
+        {
+          workers: workers,
+          pending: pending_jobs,
+          working: running_jobs
+        }
+      end
+
+      context "when there are no workers running" do
+        context "and there is no pending jobs" do
+          it "does nothing" do
+            manager.should_not_receive(:scale_up)
+            manager.should_not_receive(:scale_down)
+            perform_action
+          end
+        end
+
+        context "and there is pending jobs" do
+          let(:pending_jobs) { 2 }
+
+          it "scales up" do
+            manager.should_receive(:scale_up).with(options)
+            perform_action
+          end
+        end
+      end
+
+      context "when there are workers running" do
+        let(:workers) { 4 }
+
+        context "and there are no pending jobs" do
+          context "and no running jobs" do
+            it "scales down" do
+              manager.should_receive(:scale_down).with(options)
+              perform_action
+            end
+          end
+
+          context "but there are many running jobs" do
+            let(:running_jobs) { 4 }
+
+            it "does nothing" do
+              manager.should_not_receive(:scale_up)
+              manager.should_not_receive(:scale_down)
+              perform_action
+            end
+          end
+        end
+
+        context "and there are pending jobs" do
+          let(:pending_jobs) { 1 }
+
+          it "does nothing" do
+            manager.should_not_receive(:scale_up)
+            manager.should_not_receive(:scale_down)
+            perform_action
+          end
+        end
       end
     end
   end

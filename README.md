@@ -58,6 +58,15 @@ jobs, and the number of running jobs, like so:
 
     DynoScaler.manager.scale_up(Resque.info)
 
+You can also use the `DynoScaler::Manager#scale_with` method, passing the `Resque.info`:
+
+    DynoScaler.manager.scale_with(Resque.info)
+
+It will check whether to scale up or down based on the number of workers running,
+pending jobs, and working jobs.
+
+## Heroku Deploy
+
 When deploying to heroku you'll want to add these two configuration keys:
 
     HEROKU_API_KEY=<YOUR-API-KEY-HERE>
