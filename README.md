@@ -27,7 +27,7 @@ Just include this module in your Resque job and you're good to go:
 
     class MyJob
       include DynoScaler::Workers::Resque
-      
+
       ...
     end
 
@@ -54,7 +54,7 @@ jobs, and the number of running jobs, like so:
       pending: 5
     }
 
-This hash is exactly what `Resque.info` returns, so you may just pass it instead:
+`Resque.info` returns a hash with these keys, so you may just pass it instead:
 
     DynoScaler.manager.scale_up(Resque.info)
 
@@ -66,8 +66,8 @@ Because of this we have a async option that uses
 [GirlFriday](https://github.com/mperham/girl_friday) to handle this call
 asynchronously. To enable it, just set it to `true`:
 
-    config.async = true
-    
+    config.dyno_scaler.async = true
+
 You can also give it a block to better customize it. It will receive an options
 hash that can be passed to the `DynoScaler::Manager#scale_with` method, like so:
 
@@ -75,7 +75,7 @@ hash that can be passed to the `DynoScaler::Manager#scale_with` method, like so:
       DynoScaler.manager.scale_with(options)
     end
 
-    config.async { MY_QUEUE << options }
+    config.dyno_scaler.async { MY_QUEUE << options }
 
 ## Contributing
 
