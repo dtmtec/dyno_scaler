@@ -92,7 +92,9 @@ hash that can be passed to the `DynoScaler::Manager#scale_with` method, like so:
       DynoScaler.manager.scale_with(options)
     end
 
-    config.dyno_scaler.async { MY_QUEUE << options }
+    config.dyno_scaler.async do |options|
+      MY_QUEUE << options
+    end
 
 ## Contributing
 
