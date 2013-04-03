@@ -70,7 +70,7 @@ pending jobs, and working jobs.
 When deploying to heroku you'll want to add these two configuration keys:
 
     HEROKU_API_KEY=<YOUR-API-KEY-HERE>
-    HEROKU_APPLICATION=<THE-NAME-OF-YOUR-APP-ON-HEROKU-HERE>
+    HEROKU_APP=<THE-NAME-OF-YOUR-APP-ON-HEROKU-HERE>
 
 They are used by the [heroku-api](https://github.com/heroku/heroku.rb) gem to
 scale dynos of your application.
