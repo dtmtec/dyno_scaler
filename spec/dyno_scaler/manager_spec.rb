@@ -346,4 +346,10 @@ describe DynoScaler::Manager do
       end
     end
   end
+
+  describe "running workers" do
+    let(:heroku) { mock(DynoScaler::Heroku, scale_workers: false, running_workers: 2) }
+
+    its(:running_workers) { should eq(heroku.running_workers) }
+  end
 end

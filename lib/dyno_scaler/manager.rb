@@ -37,6 +37,10 @@ module DynoScaler
       send(action, options) if action
     end
 
+    def running_workers
+      heroku.running_workers
+    end
+
     protected
       def config
         DynoScaler.configuration
