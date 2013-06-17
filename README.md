@@ -1,9 +1,9 @@
 # DynoScaler
 
-[![alt build status][1]][2]
+[![build status][1]][2]
 
-[1]: https://travis-ci.org/dtmconsultoria/dyno_scaler.png?branch=master
-[2]: http://travis-ci.org/dtmconsultoria/dyno_scaler
+[1]: https://travis-ci.org/dtmtec/dyno_scaler.png?branch=master
+[2]: http://travis-ci.org/dtmtec/dyno_scaler
 
 Scale your dyno workers on Heroku as needed, pay only for what you use!
 
