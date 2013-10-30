@@ -10,11 +10,17 @@ group(:development) do
 
   platforms :jruby do
     gem 'ruby-debug'
-    gem 'jruby-openssl'
   end
+end
+
+platforms :jruby do
+  gem 'jruby-openssl'
 end
 
 group(:test) do
   gem 'simplecov', require: false
+  gem 'rspec'
+  gem 'resque'
+  gem 'girl_friday'
   gem 'rails'
 end
