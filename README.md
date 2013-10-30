@@ -1,6 +1,7 @@
 # DynoScaler
 
 [![build status][1]][2]
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/dtmtec/dyno_scaler/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 [1]: https://travis-ci.org/dtmtec/dyno_scaler.png
 [2]: http://travis-ci.org/dtmtec/dyno_scaler
