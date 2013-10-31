@@ -6,10 +6,10 @@ describe DynoScaler::Heroku do
   subject(:heroku_client) { DynoScaler::Heroku.new application, options }
 
   describe "scaling workers" do
-    let(:heroku_api) { mock(::Heroku::API, :post_ps_scale => false) }
+    let(:heroku_api) { double(::Heroku::API, :post_ps_scale => false) }
 
     before do
-      ::Heroku::API.stub!(:new).and_return(heroku_api)
+      ::Heroku::API.stub(:new).and_return(heroku_api)
     end
 
     let(:quantity) { 2 }

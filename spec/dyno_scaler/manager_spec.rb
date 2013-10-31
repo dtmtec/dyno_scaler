@@ -5,7 +5,7 @@ describe DynoScaler::Manager do
 
   subject(:manager) { DynoScaler::Manager.new }
 
-  let(:heroku) { mock(DynoScaler::Heroku, scale_workers: false) }
+  let(:heroku) { double(DynoScaler::Heroku, scale_workers: false) }
 
   let(:workers)      { 0 }
   let(:pending_jobs) { 0 }
@@ -27,7 +27,7 @@ describe DynoScaler::Manager do
     config.application = 'my-app'
     config.enabled = true
 
-    DynoScaler::Heroku.stub!(:new).with(config.application).and_return(heroku)
+    DynoScaler::Heroku.stub(:new).with(config.application).and_return(heroku)
   end
 
   shared_examples_for "disabled" do
@@ -348,7 +348,7 @@ describe DynoScaler::Manager do
   end
 
   describe "running workers" do
-    let(:heroku) { mock(DynoScaler::Heroku, scale_workers: false, running_workers: 2) }
+    let(:heroku) { double(DynoScaler::Heroku, scale_workers: false, running_workers: 2) }
 
     its(:running_workers) { should eq(heroku.running_workers) }
   end

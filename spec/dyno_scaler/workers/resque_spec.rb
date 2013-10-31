@@ -17,21 +17,21 @@ class SampleJob
 end
 
 describe DynoScaler::Workers::Resque do
-  let(:manager) { mock(DynoScaler::Manager, scale_up: false, scale_down: false) }
+  let(:manager) { double(DynoScaler::Manager, scale_up: false, scale_down: false) }
 
   let(:workers) { 0 }
   let(:working) { 0 }
   let(:pending) { 1 }
 
   before do
-    Resque.stub!(:info).and_return({
+    Resque.stub(:info).and_return({
       workers: workers,
       working: working,
       pending: pending
     })
 
     SampleJob.reset!
-    DynoScaler::Manager.stub!(:new).and_return(manager)
+    DynoScaler::Manager.stub(:new).and_return(manager)
   end
 
   def work_off(queue)
@@ -75,7 +75,7 @@ describe DynoScaler::Workers::Resque do
 
     context "when an error occurs while scaling up" do
       before do
-        manager.stub!(:scale_up).and_raise("error")
+        manager.stub(:scale_up).and_raise("error")
       end
 
       it "does not raises it" do
@@ -184,7 +184,7 @@ describe DynoScaler::Workers::Resque do
 
     context "when an error occurs while scaling down" do
       before do
-        manager.stub!(:scale_down).and_raise("error")
+        manager.stub(:scale_down).and_raise("error")
       end
 
       it "does not raises it" do
