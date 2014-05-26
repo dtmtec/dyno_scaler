@@ -34,6 +34,8 @@ describe DynoScaler::Workers::Resque do
     DynoScaler::Manager.stub(:new).and_return(manager)
   end
 
+  after { DynoScaler.configuration.async = false }
+
   def work_off(queue)
     job = Resque::Job.reserve(queue)
     job ? job.perform : fail("No jobs for queue '#{queue}'.")
@@ -60,6 +62,25 @@ describe DynoScaler::Workers::Resque do
       it "passes the number of pending jobs" do
         manager.should_receive(:scale_up).with(Resque.info)
         Resque.enqueue(SampleJob)
+      end
+    end
+
+    context "when it is scaling" do
+      before { SampleJob.stub(:scaling?).and_return(true) }
+
+      it "does not scales up" do
+        manager.should_not_receive(:scale_up)
+        Resque.enqueue(SampleJob)
+      end
+
+      context "and async is configured" do
+        let(:config) { DynoScaler.configuration }
+        before { config.async = true }
+
+        it "does not calls the given async processor" do
+          config.async.should_not_receive(:call)
+          Resque.enqueue(SampleJob)
+        end
       end
     end
 
@@ -132,6 +153,48 @@ describe DynoScaler::Workers::Resque do
           Resque.enqueue(SampleJob)
         end
       end
+    end
+  end
+
+  describe ".scale" do
+    before { manager.stub(:scale_with) }
+
+    it "should not be scaling before it is run" do
+      SampleJob.should_not be_scaling
+      SampleJob.scale { }
+    end
+
+    it "should not be scaling after it is run" do
+      SampleJob.scale { }
+      SampleJob.should_not be_scaling
+    end
+
+    it "calls the given block" do
+      called = false
+      SampleJob.scale do
+        called = true
+      end
+
+      called.should be_true
+    end
+
+    it "sets scaling? to true inside the given block" do
+      SampleJob.scale do
+        SampleJob.should be_scaling
+      end
+    end
+
+    it "returns the result of the block" do
+      result = SampleJob.scale do
+        'some value'
+      end
+
+      result.should eq('some value')
+    end
+
+    it "scales with Resque.info" do
+      manager.should_receive(:scale_with).with(Resque.info)
+      SampleJob.scale {}
     end
   end
 

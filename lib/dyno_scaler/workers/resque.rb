@@ -27,7 +27,7 @@ module DynoScaler
         end
 
         def after_enqueue_scale_up(*args)
-          if scale_up_enabled?
+          if scale_up_enabled? && !scaling?
             if DynoScaler.configuration.async?
               DynoScaler.configuration.async.call(::Resque.info.merge(action: :scale_up))
             else
@@ -52,6 +52,18 @@ module DynoScaler
 
         def disable_scaling_down
           self.scale_down_enabled = false
+        end
+
+        def scaling?
+          @scaling
+        end
+
+        def scale(&block)
+          @scaling = true
+          result = block.call if block_given?
+          dyno_scaler_manager.scale_with(::Resque.info)
+          @scaling = false
+          result
         end
 
         private
