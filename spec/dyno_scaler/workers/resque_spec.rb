@@ -156,6 +156,14 @@ describe DynoScaler::Workers::Resque do
     end
   end
 
+  describe "#scale" do
+    it "calls the Klass.scale" do
+      block = Proc.new { |a| }
+      SampleJob.should_receive(:scale).and_yield(block)
+      SampleJob.new.scale(&block)
+    end
+  end
+
   describe ".scale" do
     before { manager.stub(:scale_with) }
 

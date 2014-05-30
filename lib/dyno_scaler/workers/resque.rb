@@ -15,6 +15,10 @@ module DynoScaler
         enable_scaling_down
       end
 
+      def scale(&block)
+        self.class.scale(&block)
+      end
+
       module ClassMethods
         def after_perform_scale_down(*args)
           info = ::Resque.info
