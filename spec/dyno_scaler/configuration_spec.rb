@@ -4,19 +4,19 @@ describe DynoScaler::Configuration do
   subject(:config) { described_class.new }
 
   it "defaults max_workers to 1" do
-    config.max_workers.should eq(1)
+    expect(config.max_workers).to eq(1)
   end
 
   it "defaults min_workers to 0" do
-    config.min_workers.should eq(0)
+    expect(config.min_workers).to eq(0)
   end
 
   it "defaults to not enabled" do
-    config.enabled.should be_false
+    expect(config.enabled).to be_falsy
   end
 
   it "defaults job_worker_ratio to { 1 => 1, 2 => 25, 3 => 50, 4 => 75, 5 => 100 }" do
-    config.job_worker_ratio.should eq({
+    expect(config.job_worker_ratio).to eq({
       1 => 1,
       2 => 25,
       3 => 50,
@@ -26,7 +26,7 @@ describe DynoScaler::Configuration do
   end
 
   it "defaults application to nil" do
-    config.application.should be_nil
+    expect(config.application).to be_nil
   end
 
   context "when HEROKU_API_KEY environment variable is configured" do
@@ -34,7 +34,7 @@ describe DynoScaler::Configuration do
     after  { ENV['HEROKU_API_KEY'] = nil }
 
     it "defaults to enabled" do
-      config.should be_enabled
+      expect(config).to be_enabled
     end
   end
 
@@ -43,20 +43,20 @@ describe DynoScaler::Configuration do
     after  { ENV['HEROKU_APP'] = nil }
 
     it "defaults application to the value of HEROKU_APP" do
-      config.application.should eq(ENV['HEROKU_APP'])
+      expect(config.application).to eq(ENV['HEROKU_APP'])
     end
   end
 
   describe "async" do
     it "defaults to false" do
-      config.async.should be_false
+      expect(config.async).to be_falsy
     end
 
     context "when set to true" do
       before { config.async = true }
 
       it "configures a GirlFriday-callable" do
-        config.async.should respond_to(:call)
+        expect(config.async).to respond_to(:call)
       end
     end
 
@@ -66,7 +66,7 @@ describe DynoScaler::Configuration do
       end
 
       it "configures the callable" do
-        config.async.call.should eq(:ok)
+        expect(config.async.call).to eq(:ok)
       end
     end
   end

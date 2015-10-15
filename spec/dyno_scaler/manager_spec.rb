@@ -27,14 +27,14 @@ describe DynoScaler::Manager do
     config.application = 'my-app'
     config.enabled = true
 
-    DynoScaler::Heroku.stub(:new).with(config.application).and_return(heroku)
+    allow(DynoScaler::Heroku).to receive(:new).with(config.application).and_return(heroku)
   end
 
   shared_examples_for "disabled" do
     before { config.enabled = false }
 
     it "does nothing" do
-      heroku.should_not_receive(:scale_workers)
+      expect(heroku).to_not receive(:scale_workers)
       perform_action
     end
   end
@@ -47,7 +47,7 @@ describe DynoScaler::Manager do
     context "when there are no workers running" do
       context "and there is no pending jobs" do
         it "does nothing" do
-          heroku.should_not_receive(:scale_workers)
+          expect(heroku).to_not receive(:scale_workers)
           perform_action
         end
       end
@@ -57,7 +57,7 @@ describe DynoScaler::Manager do
           let(:pending_jobs) { config.job_worker_ratio[number_of_workers] }
 
           it "scales workers to #{number_of_workers}" do
-            heroku.should_receive(:scale_workers).with(number_of_workers)
+            expect(heroku).to receive(:scale_workers).with(number_of_workers)
             perform_action
           end
 
@@ -71,7 +71,7 @@ describe DynoScaler::Manager do
 
       context "and there is no pending jobs" do
         it "does nothing" do
-          heroku.should_not_receive(:scale_workers)
+          expect(heroku).to_not receive(:scale_workers)
           perform_action
         end
       end
@@ -80,7 +80,7 @@ describe DynoScaler::Manager do
         let(:pending_jobs) { config.job_worker_ratio[2] - 1 }
 
         it "does nothing" do
-          heroku.should_not_receive(:scale_workers)
+          expect(heroku).to_not receive(:scale_workers)
           perform_action
         end
       end
@@ -89,7 +89,7 @@ describe DynoScaler::Manager do
         let(:pending_jobs) { config.job_worker_ratio[2] }
 
         it "scales workers" do
-          heroku.should_receive(:scale_workers).with(2)
+          expect(heroku).to receive(:scale_workers).with(2)
           perform_action
         end
       end
@@ -100,7 +100,7 @@ describe DynoScaler::Manager do
 
       context "and there is no pending jobs" do
         it "does nothing" do
-          heroku.should_not_receive(:scale_workers)
+          expect(heroku).to_not receive(:scale_workers)
           perform_action
         end
       end
@@ -109,7 +109,7 @@ describe DynoScaler::Manager do
         let(:pending_jobs) { config.job_worker_ratio[4] - 1 }
 
         it "does nothing" do
-          heroku.should_not_receive(:scale_workers)
+          expect(heroku).to_not receive(:scale_workers)
           perform_action
         end
       end
@@ -118,7 +118,7 @@ describe DynoScaler::Manager do
         let(:pending_jobs) { config.job_worker_ratio[5] }
 
         it "scales workers" do
-          heroku.should_receive(:scale_workers).with(5)
+          expect(heroku).to receive(:scale_workers).with(5)
           perform_action
         end
       end
@@ -130,7 +130,7 @@ describe DynoScaler::Manager do
           let(:pending_jobs) { config.job_worker_ratio[5] }
 
           it "does nothing" do
-            heroku.should_not_receive(:scale_workers)
+            expect(heroku).to_not receive(:scale_workers)
             perform_action
           end
         end
@@ -145,7 +145,7 @@ describe DynoScaler::Manager do
 
     context "when there are no workers running" do
       it "does nothing" do
-        heroku.should_not_receive(:scale_workers)
+        expect(heroku).to_not receive(:scale_workers)
         perform_action
       end
     end
@@ -156,7 +156,7 @@ describe DynoScaler::Manager do
       context "and there are no pending jobs" do
         context "and no running jobs" do
           it "scales down" do
-            heroku.should_receive(:scale_workers).with(config.min_workers)
+            expect(heroku).to receive(:scale_workers).with(config.min_workers)
             perform_action
           end
 
@@ -164,7 +164,7 @@ describe DynoScaler::Manager do
             before { config.min_workers = 1 }
 
             it "does nothing" do
-              heroku.should_not_receive(:scale_workers)
+              expect(heroku).to_not receive(:scale_workers)
               perform_action
             end
           end
@@ -174,7 +174,7 @@ describe DynoScaler::Manager do
           let(:running_jobs) { 4 }
 
           it "does nothing" do
-            heroku.should_not_receive(:scale_workers)
+            expect(heroku).to_not receive(:scale_workers)
             perform_action
           end
         end
@@ -185,7 +185,7 @@ describe DynoScaler::Manager do
 
         context "and no running jobs" do
           it "does nothing" do
-            heroku.should_not_receive(:scale_workers)
+            expect(heroku).to_not receive(:scale_workers)
             perform_action
           end
         end
@@ -194,7 +194,7 @@ describe DynoScaler::Manager do
           let(:running_jobs) { 1 }
 
           it "does nothing" do
-            heroku.should_not_receive(:scale_workers)
+            expect(heroku).to_not receive(:scale_workers)
             perform_action
           end
         end
@@ -207,7 +207,7 @@ describe DynoScaler::Manager do
       context "and there are no pending jobs" do
         context "and no running jobs" do
           it "scales down" do
-            heroku.should_receive(:scale_workers).with(config.min_workers)
+            expect(heroku).to receive(:scale_workers).with(config.min_workers)
             perform_action
           end
 
@@ -215,7 +215,7 @@ describe DynoScaler::Manager do
             before { config.min_workers = 2 }
 
             it "scales down to the min workers value" do
-              heroku.should_receive(:scale_workers).with(config.min_workers)
+              expect(heroku).to receive(:scale_workers).with(config.min_workers)
               perform_action
             end
           end
@@ -225,7 +225,7 @@ describe DynoScaler::Manager do
           let(:running_jobs) { 4 }
 
           it "does nothing" do
-            heroku.should_not_receive(:scale_workers)
+            expect(heroku).to_not receive(:scale_workers)
             perform_action
           end
         end
@@ -236,7 +236,7 @@ describe DynoScaler::Manager do
 
         context "and no running jobs" do
           it "does nothing" do
-            heroku.should_not_receive(:scale_workers)
+            expect(heroku).to_not receive(:scale_workers)
             perform_action
           end
         end
@@ -245,7 +245,7 @@ describe DynoScaler::Manager do
           let(:running_jobs) { 1 }
 
           it "does nothing" do
-            heroku.should_not_receive(:scale_workers)
+            expect(heroku).to_not receive(:scale_workers)
             perform_action
           end
         end
@@ -270,7 +270,7 @@ describe DynoScaler::Manager do
 
     context "when action is scale up" do
       it "scales up passing options" do
-        manager.should_receive(:scale_up).with(options)
+        expect(manager).to receive(:scale_up).with(options)
         perform_action
       end
     end
@@ -279,7 +279,7 @@ describe DynoScaler::Manager do
       let(:action) { :scale_down }
 
       it "scales down passing options" do
-        manager.should_receive(:scale_down).with(options)
+        expect(manager).to receive(:scale_down).with(options)
         perform_action
       end
     end
@@ -296,8 +296,8 @@ describe DynoScaler::Manager do
       context "when there are no workers running" do
         context "and there is no pending jobs" do
           it "does nothing" do
-            manager.should_not_receive(:scale_up)
-            manager.should_not_receive(:scale_down)
+            expect(manager).to_not receive(:scale_up)
+            expect(manager).to_not receive(:scale_down)
             perform_action
           end
         end
@@ -306,7 +306,7 @@ describe DynoScaler::Manager do
           let(:pending_jobs) { 2 }
 
           it "scales up" do
-            manager.should_receive(:scale_up).with(options)
+            expect(manager).to receive(:scale_up).with(options)
             perform_action
           end
         end
@@ -318,7 +318,7 @@ describe DynoScaler::Manager do
         context "and there are no pending jobs" do
           context "and no running jobs" do
             it "scales down" do
-              manager.should_receive(:scale_down).with(options)
+              expect(manager).to receive(:scale_down).with(options)
               perform_action
             end
           end
@@ -327,8 +327,8 @@ describe DynoScaler::Manager do
             let(:running_jobs) { 4 }
 
             it "does nothing" do
-              manager.should_not_receive(:scale_up)
-              manager.should_not_receive(:scale_down)
+              expect(manager).to_not receive(:scale_up)
+              expect(manager).to_not receive(:scale_down)
               perform_action
             end
           end
@@ -338,8 +338,8 @@ describe DynoScaler::Manager do
           let(:pending_jobs) { 1 }
 
           it "does nothing" do
-            manager.should_not_receive(:scale_up)
-            manager.should_not_receive(:scale_down)
+            expect(manager).to_not receive(:scale_up)
+            expect(manager).to_not receive(:scale_down)
             perform_action
           end
         end

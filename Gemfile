@@ -4,8 +4,8 @@ source 'https://rubygems.org'
 gemspec
 
 group(:development) do
-  platforms :mri_19 do
-    gem 'debugger'
+  platforms :ruby do
+    gem 'byebug'
   end
 
   platforms :jruby do
@@ -20,6 +20,7 @@ end
 group(:test) do
   gem 'simplecov', require: false
   gem 'rspec'
+  gem 'rspec-its'
   gem 'resque'
   gem 'girl_friday'
   gem 'rails'

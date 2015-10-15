@@ -24,14 +24,14 @@ describe DynoScaler::Workers::Resque do
   let(:pending) { 1 }
 
   before do
-    Resque.stub(:info).and_return({
+    allow(Resque).to receive(:info).and_return({
       workers: workers,
       working: working,
       pending: pending
     })
 
     SampleJob.reset!
-    DynoScaler::Manager.stub(:new).and_return(manager)
+    allow(DynoScaler::Manager).to receive(:new).and_return(manager)
   end
 
   after { DynoScaler.configuration.async = false }
@@ -43,7 +43,7 @@ describe DynoScaler::Workers::Resque do
 
   describe "when enqueued" do
     it "scales up" do
-      manager.should_receive(:scale_up).with(Resque.info)
+      expect(manager).to receive(:scale_up).with(Resque.info)
       Resque.enqueue(SampleJob)
     end
 
@@ -51,7 +51,7 @@ describe DynoScaler::Workers::Resque do
       let(:workers) { 2 }
 
       it "passes the number of current workers to the manager" do
-        manager.should_receive(:scale_up).with(Resque.info)
+        expect(manager).to receive(:scale_up).with(Resque.info)
         Resque.enqueue(SampleJob)
       end
     end
@@ -60,16 +60,16 @@ describe DynoScaler::Workers::Resque do
       let(:pending) { 5 }
 
       it "passes the number of pending jobs" do
-        manager.should_receive(:scale_up).with(Resque.info)
+        expect(manager).to receive(:scale_up).with(Resque.info)
         Resque.enqueue(SampleJob)
       end
     end
 
     context "when it is scaling" do
-      before { SampleJob.stub(:scaling?).and_return(true) }
+      before { allow(SampleJob).to receive(:scaling?).and_return(true) }
 
       it "does not scales up" do
-        manager.should_not_receive(:scale_up)
+        expect(manager).to_not receive(:scale_up)
         Resque.enqueue(SampleJob)
       end
 
@@ -78,7 +78,7 @@ describe DynoScaler::Workers::Resque do
         before { config.async = true }
 
         it "does not calls the given async processor" do
-          config.async.should_not_receive(:call)
+          expect(config.async).to_not receive(:call)
           Resque.enqueue(SampleJob)
         end
       end
@@ -89,14 +89,14 @@ describe DynoScaler::Workers::Resque do
       after  { SampleJob.enable_scaling_up  }
 
       it "does not scale up" do
-        manager.should_not_receive(:scale_up)
+        expect(manager).to_not receive(:scale_up)
         Resque.enqueue(SampleJob)
       end
     end
 
     context "when an error occurs while scaling up" do
       before do
-        manager.stub(:scale_up).and_raise("error")
+        allow(manager).to receive(:scale_up).and_raise("error")
       end
 
       it "does not raises it" do
@@ -113,7 +113,7 @@ describe DynoScaler::Workers::Resque do
       end
 
       it "prints a message in $stderr" do
-        capture(:stderr) { Resque.enqueue(SampleJob) }.should eq("Could not scale up workers: error\n")
+        expect(capture(:stderr) { Resque.enqueue(SampleJob) }).to eq("Could not scale up workers: error\n")
       end
     end
 
@@ -124,7 +124,7 @@ describe DynoScaler::Workers::Resque do
         before { config.async = true }
 
         it "calls the given async processor passing the current Resque info and the scale up action" do
-          config.async.should_receive(:call).with(Resque.info.merge(action: :scale_up))
+          expect(config.async).to receive(:call).with(Resque.info.merge(action: :scale_up))
           Resque.enqueue(SampleJob)
         end
 
@@ -137,7 +137,7 @@ describe DynoScaler::Workers::Resque do
           end
 
           it "runs the scale up with the Resque info and the scale up action" do
-            DynoScaler.manager.should_receive(:scale_with).with(Resque.info.merge(action: :scale_up))
+            expect(DynoScaler.manager).to receive(:scale_with).with(Resque.info.merge(action: :scale_up))
             Resque.enqueue(SampleJob)
           end
         end
@@ -149,7 +149,7 @@ describe DynoScaler::Workers::Resque do
         end
 
         it "calls the given async processor passing the current Resque info and the scale up action" do
-          config.async.should_receive(:call).with(Resque.info.merge(action: :scale_up))
+          expect(config.async).to receive(:call).with(Resque.info.merge(action: :scale_up))
           Resque.enqueue(SampleJob)
         end
       end
@@ -159,22 +159,22 @@ describe DynoScaler::Workers::Resque do
   describe "#scale" do
     it "calls the Klass.scale" do
       block = Proc.new { |a| }
-      SampleJob.should_receive(:scale).and_yield(block)
+      expect(SampleJob).to receive(:scale).and_yield(block)
       SampleJob.new.scale(&block)
     end
   end
 
   describe ".scale" do
-    before { manager.stub(:scale_with) }
+    before { allow(manager).to receive(:scale_with) }
 
     it "should not be scaling before it is run" do
-      SampleJob.should_not be_scaling
+      expect(SampleJob).to_not be_scaling
       SampleJob.scale { }
     end
 
     it "should not be scaling after it is run" do
       SampleJob.scale { }
-      SampleJob.should_not be_scaling
+      expect(SampleJob).to_not be_scaling
     end
 
     it "calls the given block" do
@@ -183,12 +183,12 @@ describe DynoScaler::Workers::Resque do
         called = true
       end
 
-      called.should be_true
+      expect(called).to be_truthy
     end
 
     it "sets scaling? to true inside the given block" do
       SampleJob.scale do
-        SampleJob.should be_scaling
+        expect(SampleJob).to be_scaling
       end
     end
 
@@ -197,11 +197,11 @@ describe DynoScaler::Workers::Resque do
         'some value'
       end
 
-      result.should eq('some value')
+      expect(result).to eq('some value')
     end
 
     it "scales with Resque.info" do
-      manager.should_receive(:scale_with).with(Resque.info)
+      expect(manager).to receive(:scale_with).with(Resque.info)
       SampleJob.scale {}
     end
   end
@@ -212,7 +212,7 @@ describe DynoScaler::Workers::Resque do
     end
 
     it "scales down" do
-      manager.should_receive(:scale_down).with(Resque.info)
+      expect(manager).to receive(:scale_down).with(Resque.info)
       work_off(:sample)
     end
 
@@ -220,7 +220,7 @@ describe DynoScaler::Workers::Resque do
       let(:workers) { 2 }
 
       it "passes the number of current workers to the manager" do
-        manager.should_receive(:scale_down).with(Resque.info)
+        expect(manager).to receive(:scale_down).with(Resque.info)
         work_off(:sample)
       end
     end
@@ -229,7 +229,7 @@ describe DynoScaler::Workers::Resque do
       let(:pending) { 5 }
 
       it "passes the number of pending jobs" do
-        manager.should_receive(:scale_down).with(Resque.info)
+        expect(manager).to receive(:scale_down).with(Resque.info)
         work_off(:sample)
       end
     end
@@ -238,7 +238,7 @@ describe DynoScaler::Workers::Resque do
       let(:working) { 5 }
 
       it "passes the number of running jobs minus 1, since we do not count ourselves" do
-        manager.should_receive(:scale_down).with(Resque.info.merge(working: Resque.info[:working] - 1))
+        expect(manager).to receive(:scale_down).with(Resque.info.merge(working: Resque.info[:working] - 1))
         work_off(:sample)
       end
     end
@@ -248,14 +248,14 @@ describe DynoScaler::Workers::Resque do
       after  { SampleJob.enable_scaling_down  }
 
       it "does not scale down" do
-        manager.should_not_receive(:scale_down)
+        expect(manager).to_not receive(:scale_down)
         work_off(:sample)
       end
     end
 
     context "when an error occurs while scaling down" do
       before do
-        manager.stub(:scale_down).and_raise("error")
+        allow(manager).to receive(:scale_down).and_raise("error")
       end
 
       it "does not raises it" do
@@ -265,7 +265,7 @@ describe DynoScaler::Workers::Resque do
       end
 
       it "prints a message in $stderr" do
-        capture(:stderr) { work_off(:sample) }.should eq("Could not scale down workers: error\n")
+        expect(capture(:stderr) { work_off(:sample) }).to eq("Could not scale down workers: error\n")
       end
     end
   end
