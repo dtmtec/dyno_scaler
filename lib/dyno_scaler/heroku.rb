@@ -10,7 +10,7 @@ module DynoScaler
     end
 
     def scale_workers(quantity)
-      heroku_client.formation.update(application, 'worker', { size: quantity })
+      heroku_client.formation.update(application, 'worker', { quantity: quantity })
     end
 
     protected

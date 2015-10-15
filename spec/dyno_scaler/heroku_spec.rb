@@ -19,7 +19,7 @@ describe DynoScaler::Heroku do
     let(:quantity) { 2 }
 
     it "scales workers of the application to the given number of workers" do
-      expect(heroku_api.formation).to receive(:update).with(application, 'worker', { size: quantity })
+      expect(heroku_api.formation).to receive(:update).with(application, 'worker', { quantity: quantity })
       heroku_client.scale_workers(quantity)
     end
   end
