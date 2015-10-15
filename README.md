@@ -32,6 +32,28 @@ Just include this module in your Resque job and you're good to go:
       ...
     end
 
+If you are using Sidekiq, then just configure the middlewares:
+
+    # Client middleware
+    Sidekiq.configure_client do |config|
+      config.client_middleware do |chain|
+        chain.add DynoScaler::Workers::Sidekiq::ClientMiddleware
+      end
+    end
+
+    # Server middleware
+    Sidekiq.configure_server do |config|
+      # Configure client middleware here if your jobs may enqueue another jobs
+      config.client_middleware do |chain|
+        chain.add DynoScaler::Workers::Sidekiq::ClientMiddleware
+      end
+
+      config.server_middleware do |chain|
+        chain.add DynoScaler::Workers::Sidekiq::ServerMiddleware
+      end
+    end
+
+
 You can access the configuration with (for example):
 
     DynoScaler.configuration.max_workers = 3
@@ -65,6 +87,8 @@ You can also use the `DynoScaler::Manager#scale_with` method, passing the `Resqu
 
 It will check whether to scale up or down based on the number of workers running,
 pending jobs, and working jobs.
+
+For Sidekiq you can use `DynoScaler::Workers::Sidekiq.info` method instead of `Resque.info`.
 
 ## Heroku Deploy
 

@@ -22,6 +22,7 @@ group(:test) do
   gem 'rspec'
   gem 'rspec-its'
   gem 'resque'
+  gem 'sidekiq'
   gem 'girl_friday'
   gem 'rails'
 end
