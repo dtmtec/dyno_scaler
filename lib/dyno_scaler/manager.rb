@@ -47,8 +47,17 @@ module DynoScaler
       end
 
       def scale_to(number_of_workers)
-        config.logger.info "Scaling workers to #{number_of_workers}"
-        heroku.scale_workers(number_of_workers)
+        if scale_to?(number_of_workers)
+          config.logger.info "Scaling workers to #{number_of_workers}"
+          heroku.scale_workers(number_of_workers)
+          config.redis.set("dyno-scaler-throttle".freeze, number_of_workers, ex: config.throttle_time)
+        end
+      end
+
+      def scale_to?(number_of_workers)
+        throttle = config.redis.get("dyno-scaler-throttle".freeze)
+
+        !throttle || throttle.to_i != number_of_workers
       end
 
       def pending_jobs?

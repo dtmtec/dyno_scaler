@@ -27,6 +27,8 @@ describe DynoScaler::Manager do
     config.application = 'my-app'
     config.enabled = true
 
+    config.redis.del "dyno-scaler-throttle"
+
     allow(DynoScaler::Heroku).to receive(:new).with(config.application).and_return(heroku)
   end
 
@@ -36,6 +38,40 @@ describe DynoScaler::Manager do
     it "does nothing" do
       expect(heroku).to_not receive(:scale_workers)
       perform_action
+    end
+  end
+
+  shared_examples_for "throttling" do
+    context "when there is a throttle key" do
+      let(:throttle_value) { 0 }
+      before { config.redis.set("dyno-scaler-throttle", throttle_value) }
+
+      context "with a value that is smaller than the number_of_workers" do
+        let(:throttle_value) { number_of_workers - 1 }
+
+        it "will scale workers" do
+          expect(heroku).to receive(:scale_workers).with(number_of_workers)
+          perform_action
+        end
+      end
+
+      context "with a value that is equal to the number_of_workers" do
+        let(:throttle_value) { number_of_workers }
+
+        it "will not scale workers" do
+          expect(heroku).to_not receive(:scale_workers)
+          perform_action
+        end
+      end
+
+      context "with a value that is greater than the number_of_workers" do
+        let(:throttle_value) { number_of_workers + 1 }
+
+        it "will scale workers" do
+          expect(heroku).to receive(:scale_workers).with(number_of_workers)
+          perform_action
+        end
+      end
     end
   end
 
@@ -62,6 +98,9 @@ describe DynoScaler::Manager do
           end
 
           it_should_behave_like "disabled"
+          it_should_behave_like "throttling" do
+            let(:number_of_workers) { number_of_workers }
+          end
         end
       end
     end
@@ -92,6 +131,10 @@ describe DynoScaler::Manager do
           expect(heroku).to receive(:scale_workers).with(2)
           perform_action
         end
+
+        it_should_behave_like "throttling" do
+          let(:number_of_workers) { 2 }
+        end
       end
     end
 
@@ -120,6 +163,10 @@ describe DynoScaler::Manager do
         it "scales workers" do
           expect(heroku).to receive(:scale_workers).with(5)
           perform_action
+        end
+
+        it_should_behave_like "throttling" do
+          let(:number_of_workers) { 5 }
         end
       end
 
@@ -158,6 +205,10 @@ describe DynoScaler::Manager do
           it "scales down" do
             expect(heroku).to receive(:scale_workers).with(config.min_workers)
             perform_action
+          end
+
+          it_should_behave_like "throttling" do
+            let(:number_of_workers) { config.min_workers }
           end
 
           context "when min_workers is configured with a different value" do
@@ -211,12 +262,20 @@ describe DynoScaler::Manager do
             perform_action
           end
 
+          it_should_behave_like "throttling" do
+            let(:number_of_workers) { config.min_workers }
+          end
+
           context "when min_workers is configured with a different value" do
             before { config.min_workers = 2 }
 
             it "scales down to the min workers value" do
               expect(heroku).to receive(:scale_workers).with(config.min_workers)
               perform_action
+            end
+
+            it_should_behave_like "throttling" do
+              let(:number_of_workers) { config.min_workers }
             end
           end
         end

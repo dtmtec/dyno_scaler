@@ -52,11 +52,31 @@ module DynoScaler
     # @return [String] default: nil
     attr_accessor :application
 
+    ##
+    # To prevent multiple heroku api calls to be made when enqueueing multiple jobs
+    # in a short period of time we add a throttle. Basically, within the time window
+    # of this configuration we only send a new heroku api call if the expected
+    # number of workers has changed. When the throttle expires we will make api
+    # calls even if the number of workers has not changed
+    #
+    # @param [Integer] the amount of time to reenable api calls
+    # @return [Integer] default: 5
+    attr_accessor :throttle_time
+
+    ##
+    # Redis client used to throttle calls to heroku
+    #
+    # @param [Redis] a redis client
+    # @return [Redis] default: Redis.new
+    attr_accessor :redis
+
     def initialize
       self.max_workers      = 1
       self.min_workers      = 0
       self.enabled          = !ENV['HEROKU_API_KEY'].nil?
       self.application      = ENV['HEROKU_APP']
+      self.redis            = Redis.new
+      self.throttle_time    = 5
 
       self.job_worker_ratio = {
         1 => 1,

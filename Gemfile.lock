@@ -4,6 +4,8 @@ PATH
     dyno_scaler (0.3.0)
       activesupport
       heroku-api
+      redis
+      redis-namespace
 
 GEM
   remote: https://rubygems.org/
