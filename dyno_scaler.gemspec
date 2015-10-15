@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "heroku-api"
+  gem.add_dependency "platform-api"
   gem.add_dependency "activesupport"
   gem.add_dependency "redis"
   gem.add_dependency "redis-namespace"

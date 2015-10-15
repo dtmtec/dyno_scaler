@@ -2,7 +2,7 @@
 
 require "dyno_scaler/version"
 require "active_support/core_ext/class/attribute"
-require "heroku-api"
+require "platform-api"
 
 module DynoScaler
   autoload :Configuration, 'dyno_scaler/configuration'

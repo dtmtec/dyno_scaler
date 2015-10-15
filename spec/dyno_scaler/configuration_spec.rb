@@ -29,9 +29,9 @@ describe DynoScaler::Configuration do
     expect(config.application).to be_nil
   end
 
-  context "when HEROKU_API_KEY environment variable is configured" do
-    before { ENV['HEROKU_API_KEY'] = 'some-api-key' }
-    after  { ENV['HEROKU_API_KEY'] = nil }
+  context "when HEROKU_OAUTH_TOKEN environment variable is configured" do
+    before { ENV['HEROKU_OAUTH_TOKEN'] = 'some-api-key' }
+    after  { ENV['HEROKU_OAUTH_TOKEN'] = nil }
 
     it "defaults to enabled" do
       expect(config).to be_enabled

@@ -36,7 +36,7 @@ module DynoScaler
     attr_accessor :job_worker_ratio
 
     ##
-    # Default is false when HEROKU_API_KEY environment variable is not set,
+    # Default is false when HEROKU_OAUTH_TOKEN environment variable is not set,
     # otherwise defaults to true.
     #
     # @param [Boolean] whether to enable scaling or not
@@ -73,7 +73,7 @@ module DynoScaler
     def initialize
       self.max_workers      = 1
       self.min_workers      = 0
-      self.enabled          = !ENV['HEROKU_API_KEY'].nil?
+      self.enabled          = !ENV['HEROKU_OAUTH_TOKEN'].nil?
       self.application      = ENV['HEROKU_APP']
       self.redis            = Redis.new
       self.throttle_time    = 5

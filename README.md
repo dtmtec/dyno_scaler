@@ -94,10 +94,10 @@ For Sidekiq you can use `DynoScaler::Workers::Sidekiq.info` method instead of `R
 
 When deploying to heroku you'll want to add these two configuration keys:
 
-    HEROKU_API_KEY=<YOUR-API-KEY-HERE>
+    HEROKU_OAUTH_TOKEN=<YOUR-OAUTH-TOKEN-HERE>
     HEROKU_APP=<THE-NAME-OF-YOUR-APP-ON-HEROKU-HERE>
 
-They are used by the [heroku-api](https://github.com/heroku/heroku.rb) gem to
+They are used by the [platform-api](https://github.com/heroku/platform-api) gem to
 scale dynos of your application.
 
 ## Async

@@ -10,18 +10,12 @@ module DynoScaler
     end
 
     def scale_workers(quantity)
-      heroku_client.post_ps_scale(application, 'worker', quantity)
-    end
-
-    def running_workers
-      heroku_client.get_ps(application).body.select do |process|
-        process['process'].start_with?('worker')
-      end.count
+      heroku_client.formation.update(application, 'worker', { size: quantity })
     end
 
     protected
       def heroku_client
-        @heroku_client ||= ::Heroku::API.new(options)
+        @heroku_client ||= PlatformAPI.connect_oauth(ENV['HEROKU_OAUTH_TOKEN'])
       end
   end
 end
