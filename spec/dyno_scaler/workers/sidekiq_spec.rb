@@ -73,5 +73,44 @@ describe DynoScaler::Workers::Sidekiq do
       expect(manager).to receive(:scale_up).with(expected_info)
       middleware.call('worker', 'msg', 'queue') {}
     end
+
+    context "and async is configured" do
+      let(:config) { DynoScaler.configuration }
+      let(:expected_info) { info.merge(pending: info[:pending] + 1, action: :scale_up) }
+
+      context "with default processor" do
+        before { config.async = true }
+
+        it "calls the given async processor passing the current info and the scale up action" do
+          expect(config.async).to receive(:call).with(expected_info)
+          middleware.call('worker', 'msg', 'queue') {}
+        end
+
+        context "and the Girl-Friday job is run" do
+          before { GirlFriday::Queue.immediate! }
+
+          after do
+            GirlFriday::Queue.queue!
+            DynoScaler.reset!
+          end
+
+          it "runs the scale up with the info and the scale up action" do
+            expect(DynoScaler.manager).to receive(:scale_with).with(expected_info)
+            middleware.call('worker', 'msg', 'queue') {}
+          end
+        end
+      end
+
+      context "with a block" do
+        before do
+          config.async { |options| :ok }
+        end
+
+        it "calls the given async processor passing the current Resque info and the scale up action" do
+          expect(config.async).to receive(:call).with(expected_info)
+          middleware.call('worker', 'msg', 'queue') {}
+        end
+      end
+    end
   end
 end

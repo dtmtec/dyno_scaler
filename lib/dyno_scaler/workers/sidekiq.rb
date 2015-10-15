@@ -50,7 +50,13 @@ module DynoScaler
             cancel_scale_down
 
             data = info
-            dyno_scaler_manager.scale_up(data.merge(pending: data[:pending] + 1))
+            data.merge!(pending: data[:pending] + 1)
+
+            if DynoScaler.configuration.async?
+              DynoScaler.configuration.async.call(data.merge(action: :scale_up))
+            else
+              dyno_scaler_manager.scale_up(data)
+            end
           end
         end
       end
