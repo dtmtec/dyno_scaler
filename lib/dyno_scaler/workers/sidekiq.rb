@@ -1,3 +1,5 @@
+require 'sidekiq/api'
+
 module DynoScaler
   module Workers
     module Sidekiq
