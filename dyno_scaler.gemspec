@@ -19,6 +19,6 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "platform-api"
   gem.add_dependency "activesupport"
-  gem.add_dependency "redis"
+  gem.add_dependency "redis", ">= 4.5.1"
   gem.add_dependency "redis-namespace"
 end

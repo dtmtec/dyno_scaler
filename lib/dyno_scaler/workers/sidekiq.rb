@@ -19,7 +19,7 @@ module DynoScaler
         end
 
         def scale_down_cancelled?
-          ::Sidekiq.redis { |redis| redis.exists('dyno-scale-scale-down-cancelled') }
+          ::Sidekiq.redis { |redis| redis.exists?('dyno-scale-scale-down-cancelled') }
         end
 
         def cancel_scale_down

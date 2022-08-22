@@ -24,5 +24,5 @@ group(:test) do
   gem 'resque'
   gem 'sidekiq'
   gem 'girl_friday'
-  gem 'rails'
+  gem 'rails', ">= 5.2.5"
 end
